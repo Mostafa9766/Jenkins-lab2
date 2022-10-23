@@ -1,0 +1,34 @@
+pipeline { 
+     agent {label 'docker'} 
+    stages { 
+        stage('preparation') { 
+            steps { 
+                git 'https://github.com/mahmoud254/jenkins_nodejs_example.git'
+                } 
+            } 
+        stage('ci'){ 
+            steps {
+                withCredentials([usernamePassword(credentialsId:'dockerrepo', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                sh """
+                docker build . -t node-app:$BUILD_NUMBER
+                docker tag node-app:$BUILD_NUMBER m0stafaahmed/node-app:$BUILD_NUMBER
+                docker login -u $USERNAME -p $PASSWORD
+                docker push m0stafaahmed/node-app:$BUILD_NUMBER
+                """
+            }
+        }
+    }
+        stage('cd'){ 
+            steps {
+                sh "docker run -d -p 3000:3000 m0stafaahmed/node-app:$BUILD_NUMBER"
+                }
+            }
+        post { 
+            success { 		slackSend color: "#439FE0" , message:"Build deployed successfully - ${env.JOB_NAME} ${env.BUILD_NUMBER}" 	} 	
+            failure { 		 slackSend failOnError:true , message:"Build failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} " 		} 
+            
+        }
+            
+        }
+    }
+                

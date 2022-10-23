@@ -1,0 +1,48 @@
+- name : slave
+  hosts: all
+  remote_user: ubuntu
+  become: yes
+  tasks:
+    - name: update
+      apt: 
+        update_cache: yes
+        
+    - name: install open-jdk
+        apt:
+          name: openjdk-11-jdk
+
+    - name: install docker
+      apt: 
+        name: docker.io
+
+    - name: change docker sock permissions
+      file:
+        path: /var/run/docker.sock
+        mode: '0666'
+        
+    - name: ensure the jenkins apt repository key is installed
+      apt_key: 
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key 
+        state: present
+
+    - name: ensure the repository is configured
+      apt_repository: 
+        repo: 'deb https://pkg.jenkins.io/debian-stable binary/' 
+        state: present
+
+    - name: ensure jenkins is installed
+      apt: 
+        name: jenkins 
+        update_cache: yes
+
+    - name: jenkins_home
+        file: 
+          path: /home/ubuntu/jenkins_home
+          state: directory
+          mode: '0777'
+
+    - name: Enable and Start the Jenkins Service
+      service:
+        name: jenkins
+        state: started
+    
