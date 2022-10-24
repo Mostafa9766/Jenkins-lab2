@@ -22,13 +22,13 @@ pipeline {
             steps {
                 sh "docker run -d -p 3000:3000 m0stafaahmed/node-app:$BUILD_NUMBER"
                 }
-            }
-        post { 
-            success { 		slackSend color: "#439FE0" , message:"Build deployed successfully - ${env.JOB_NAME} ${env.BUILD_NUMBER}" 	} 	
-            failure { 		 slackSend failOnError:true , message:"Build failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} " 		} 
-            
+            }            
         }
-            
+  post {
+            success {           slackSend color: "#439FE0" , message:"Build deployed successfully - ${env.JOB_NAME} ${env.BUILD_NUMBER}"        }      
+            failure {            slackSend failOnError:true , message:"Build failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} "             }
+
         }
+
     }
                 
